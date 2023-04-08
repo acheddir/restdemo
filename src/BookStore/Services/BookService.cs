@@ -27,7 +27,6 @@ namespace BookStore.Services
 
             var book = new Book
             {
-                Id = 2,
                 Title = command.Title,
                 Year = command.Year,
                 TopicId = topic.Id,
@@ -38,15 +37,17 @@ namespace BookStore.Services
 
             await _context.SaveChangesAsync();
 
-            return _mapper.Map<BookResponse>(book);
+            return new BookResponse(book.Title, book.Year, book.Topic.Title);
         }
 
-        public Task<List<BookResponse>> GetBooksAsync()
+        public async Task<List<BookResponse>> GetBooksAsync()
         {
-            return _context.Books
+            var bookEntities = await _context.Books
                 .Include(b => b.Topic)
-                .ProjectTo<BookResponse>(_mapper.ConfigurationProvider)
+                .Select(b => new BookResponse(b.Title, b.Year, b.Topic.Title))
                 .ToListAsync();
+
+            return bookEntities;
         }
     }
 }
