@@ -33,10 +33,19 @@ app.MapGet("api/v1/books", async (IBookService bookService) =>
     return Results.Ok(books);
 });
 
+app.MapGet("api/v1/books/{id}", async (IBookService bookService, int id) =>
+{
+    var book = await bookService.GetBookById(id);
+
+    if (book is null)
+        return Results.NotFound();
+
+    return Results.Ok(book);
+});
+
 app.MapPost("api/v1/books", async (IBookService bookService, CreateBookCommand command) =>
 {
     var bookResponse = await bookService.CreateBook(command);
-
     return Results.Created($"api/v1/books/{bookResponse.Title}", bookResponse);
 });
 

@@ -1,0 +1,15 @@
+### Get books
+GET http://localhost:5035/api/v1/books
+
+### Get a book by id
+GET http://localhost:5035/api/v1/books/2
+
+### Create a book
+POST http://localhost:5035/api/v1/books
+
+{
+  "title": "string",
+  "year": 0,
+  "topic": "string",
+  "author": "string"
+}

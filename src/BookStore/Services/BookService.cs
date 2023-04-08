@@ -1,4 +1,5 @@
 ﻿using AutoMapper.QueryableExtensions;
+using BookStore.Exceptions;
 using BookStore.Services.Dto;
 
 namespace BookStore.Services
@@ -7,6 +8,7 @@ namespace BookStore.Services
     {
         Task<List<BookResponse>> GetBooksAsync();
         Task<BookResponse> CreateBook(CreateBookCommand command);
+        Task<BookResponse> GetBookById(int id);
     }
 
     public class BookService : IBookService
@@ -36,6 +38,16 @@ namespace BookStore.Services
             _context.Books.Add(book);
 
             await _context.SaveChangesAsync();
+
+            return new BookResponse(book.Title, book.Year, book.Topic.Title);
+        }
+
+        public async Task<BookResponse?> GetBookById(int id)
+        {
+            var book = await _context.Books.Include(b => b.Topic).FirstOrDefaultAsync(b => b.Id == id);
+
+            if (book is null)
+                return null;
 
             return new BookResponse(book.Title, book.Year, book.Topic.Title);
         }
