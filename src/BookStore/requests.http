@@ -2,14 +2,27 @@
 GET http://localhost:5035/api/v1/books
 
 ### Get a book by id
-GET http://localhost:5035/api/v1/books/2
+GET http://localhost:5035/api/v1/books/1001
 
 ### Create a book
 POST http://localhost:5035/api/v1/books
+Content-Type: application/json
 
 {
-  "title": "string",
-  "year": 0,
-  "topic": "string",
-  "author": "string"
+  "title": "EF Core in Action",
+  "year": 2021,
+  "topic": "Software Engineering",
+  "author": "John Smith"
+}
+
+### Remove a book
+DELETE http://localhost:5035/api/v1/books/1
+
+### Update a book
+PUT http://localhost:5035/api/v1/books/9834
+Content-Type: application/json
+
+{
+  "title": "EF Core in Depth",
+  "year": 2022
 }

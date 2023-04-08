@@ -49,4 +49,24 @@ app.MapPost("api/v1/books", async (IBookService bookService, CreateBookCommand c
     return Results.Created($"api/v1/books/{bookResponse.Title}", bookResponse);
 });
 
+app.MapDelete("api/v1/books/{id}", async (IBookService bookService, int id) =>
+{
+    var result = await bookService.RemoveBook(id);
+
+    if (result <= 0)
+        return Results.NotFound();
+
+    return Results.Ok();
+});
+
+app.MapPut("api/v1/books/{id}", async (IBookService bookService, int id, UpdateBookCommand command) =>
+{
+    var bookResponse = await bookService.UpdateBook(id, command);
+
+    if (bookResponse is null)
+        return Results.NotFound();
+
+    return Results.Ok(bookResponse);
+});
+
 app.Run();
