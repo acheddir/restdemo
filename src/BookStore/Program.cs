@@ -72,6 +72,12 @@ app.MapPut("api/v1/books/{isbn}", async (BookStoreContext context, string isbn, 
     bookEntity.Title = command.Title;
     bookEntity.Year = command.Year;
 
+    /* -- Non Idempotent check
+     var bookEntry = context.ChangeTracker.Entries<Book>().FirstOrDefault(b => b.Entity.ISBN == isbn);
+     if (bookEntry is not null && bookEntry.State == EntityState.Unchanged)
+         return Results.BadRequest(new { message = "No changes detected." });
+    */
+
     await context.SaveChangesAsync();
 
     var bookResponse = new BookResponse(bookEntity.ISBN, bookEntity.Title, bookEntity.Year);
