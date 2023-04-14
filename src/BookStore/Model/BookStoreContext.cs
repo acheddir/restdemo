@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Components.Web;
-using Microsoft.EntityFrameworkCore;
-
 namespace BookStore.Model;
 
 public class BookStoreContext : DbContext
@@ -20,14 +17,17 @@ public class BookStoreContext : DbContext
 
         modelBuilder.Entity<Author>()
             .Property(a => a.Id)
+            .ValueGeneratedOnAdd()
             .UseHiLo("IdSequence");
 
         modelBuilder.Entity<Topic>()
             .Property(a => a.Id)
+            .ValueGeneratedOnAdd()
             .UseHiLo("IdSequence");
 
         modelBuilder.Entity<Book>()
             .Property(a => a.Id)
+            .ValueGeneratedOnAdd()
             .UseHiLo("IdSequence");
 
         base.OnModelCreating(modelBuilder);

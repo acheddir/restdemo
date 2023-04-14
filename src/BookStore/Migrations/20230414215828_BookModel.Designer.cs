@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BookStore.Migrations
 {
     [DbContext(typeof(BookStoreContext))]
-    [Migration("20230408142149_BookStore_InitialModel")]
-    partial class BookStore_InitialModel
+    [Migration("20230414215828_BookModel")]
+    partial class BookModel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,6 +36,7 @@ namespace BookStore.Migrations
                     NpgsqlPropertyBuilderExtensions.UseHiLo(b.Property<int>("Id"), "IdSequence");
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -51,23 +52,19 @@ namespace BookStore.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseHiLo(b.Property<int>("Id"), "IdSequence");
 
-                    b.Property<int>("AuthorId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Title")
+                    b.Property<string>("ISBN")
+                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("TopicId")
-                        .HasColumnType("integer");
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.Property<int>("Year")
-                        .HasColumnType("integer");
+                    b.Property<string>("Year")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AuthorId");
-
-                    b.HasIndex("TopicId");
 
                     b.ToTable("Books");
                 });
@@ -81,30 +78,12 @@ namespace BookStore.Migrations
                     NpgsqlPropertyBuilderExtensions.UseHiLo(b.Property<int>("Id"), "IdSequence");
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
                     b.ToTable("Topics");
-                });
-
-            modelBuilder.Entity("BookStore.Model.Book", b =>
-                {
-                    b.HasOne("BookStore.Model.Author", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BookStore.Model.Topic", "Topic")
-                        .WithMany()
-                        .HasForeignKey("TopicId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Author");
-
-                    b.Navigation("Topic");
                 });
 #pragma warning restore 612, 618
         }
