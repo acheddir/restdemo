@@ -1,15 +1,7 @@
-using BookStore.Services;
-using BookStore.Services.Dto;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<BookStoreContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("BookStore")));
-
-//builder.Services.AddAutoMapper(typeof(BookProfile).Assembly);
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-builder.Services.AddScoped<IBookService, BookService>();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -27,44 +19,60 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("api/v1/books", async (IBookService bookService) =>
+app.MapGet("api/v1/books", async (BookStoreContext context) =>
 {
-    var books = await bookService.GetBooksAsync();
+    var books = await context.Books
+        .Where(b => !b.IsDeleted)
+        .Select(b => new BookResponse(b.ISBN, b.Title, b.Year))
+        .ToListAsync();
+
     return Results.Ok(books);
 });
 
-app.MapGet("api/v1/books/{id}", async (IBookService bookService, int id) =>
+app.MapGet("api/v1/books/{isbn}", async (BookStoreContext context, string isbn) =>
+    await context.Books.FirstOrDefaultAsync(b => b.ISBN == isbn)
+        is Book bookEntity
+            ? Results.Ok(new BookResponse(bookEntity.ISBN, bookEntity.Title, bookEntity.Year))
+            : Results.NotFound());
+
+app.MapPost("api/v1/books", async (BookStoreContext context, CreateBookCommand command) =>
 {
-    var book = await bookService.GetBookById(id);
+    var bookEntity = context.Books.Add(new Book { ISBN = command.ISBN, Title = command.Title, Year = command.Year, IsDeleted = false }).Entity;
 
-    if (book is null)
-        return Results.NotFound();
+    await context.SaveChangesAsync();
 
-    return Results.Ok(book);
+    var bookResponse = new BookResponse(bookEntity.ISBN, bookEntity.Title, bookEntity.Year);
+
+    return Results.Created($"api/v1/books/{bookResponse.ISBN}", bookResponse);
 });
 
-app.MapPost("api/v1/books", async (IBookService bookService, CreateBookCommand command) =>
+app.MapDelete("api/v1/books/{isbn}", async (BookStoreContext context, string isbn) =>
 {
-    var bookResponse = await bookService.CreateBook(command);
-    return Results.Created($"api/v1/books/{bookResponse.Title}", bookResponse);
+    if (await context.Books.FirstOrDefaultAsync(b => b.ISBN == isbn && !b.IsDeleted) is Book book)
+    {
+        // Soft Delete
+        book.IsDeleted = true;
+
+        await context.SaveChangesAsync();
+        
+        return Results.Ok();
+    }
+
+    return Results.NotFound();
 });
 
-app.MapDelete("api/v1/books/{id}", async (IBookService bookService, int id) =>
+app.MapPut("api/v1/books/{isbn}", async (BookStoreContext context, string isbn, UpdateBookCommand command) =>
 {
-    var result = await bookService.RemoveBook(id);
+    var bookEntity = await context.Books.FirstOrDefaultAsync(b => b.ISBN == isbn && !b.IsDeleted);
 
-    if (result <= 0)
+    if (bookEntity is null)
         return Results.NotFound();
 
-    return Results.Ok();
-});
+    bookEntity.ISBN = command.ISBN;
+    bookEntity.Title = command.Title;
+    bookEntity.Year = command.Year;
 
-app.MapPut("api/v1/books/{id}", async (IBookService bookService, int id, UpdateBookCommand command) =>
-{
-    var bookResponse = await bookService.UpdateBook(id, command);
-
-    if (bookResponse is null)
-        return Results.NotFound();
+    var bookResponse = new BookResponse(bookEntity.ISBN, bookEntity.Title, bookEntity.Year);
 
     return Results.Ok(bookResponse);
 });

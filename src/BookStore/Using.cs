@@ -1,3 +1,3 @@
 global using Microsoft.EntityFrameworkCore;
-global using AutoMapper;
 global using BookStore.Model;
+global using BookStore.Dto;
