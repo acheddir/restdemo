@@ -2,27 +2,27 @@
 GET http://localhost:5035/api/v1/books
 
 ### Get a book by id
-GET http://localhost:5035/api/v1/books/1
+GET http://localhost:5035/api/v1/books/9781617296284
 
 ### Create a book
 POST http://localhost:5035/api/v1/books
 Content-Type: application/json
 
 {
-  "title": "EF Core in Action",
-  "year": 2021,
-  "topic": "Software Engineering",
-  "author": "John Smith"
+  "isbn": "9781617296284",
+  "title": "Desiging APIs with Swagger and OpenAPI",
+  "year": "2002"
 }
 
 ### Remove a book
-DELETE http://localhost:5035/api/v1/books/1
+DELETE http://localhost:5035/api/v1/books/9781617296284
 
 ### Update a book
-PUT http://localhost:5035/api/v1/books/9834
+PUT http://localhost:5035/api/v1/books/9781617296284
 Content-Type: application/json
 
 {
-  "title": "EF Core in Depth",
-  "year": 2022
+  "isbn": "9781617296284",
+  "title": "Designing APIs with Swagger and OpenAPI",
+  "year": "2022"
 }

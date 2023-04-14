@@ -30,7 +30,7 @@ app.MapGet("api/v1/books", async (BookStoreContext context) =>
 });
 
 app.MapGet("api/v1/books/{isbn}", async (BookStoreContext context, string isbn) =>
-    await context.Books.FirstOrDefaultAsync(b => b.ISBN == isbn)
+    await context.Books.FirstOrDefaultAsync(b => b.ISBN == isbn && !b.IsDeleted)
         is Book bookEntity
             ? Results.Ok(new BookResponse(bookEntity.ISBN, bookEntity.Title, bookEntity.Year))
             : Results.NotFound());
@@ -71,6 +71,8 @@ app.MapPut("api/v1/books/{isbn}", async (BookStoreContext context, string isbn, 
     bookEntity.ISBN = command.ISBN;
     bookEntity.Title = command.Title;
     bookEntity.Year = command.Year;
+
+    await context.SaveChangesAsync();
 
     var bookResponse = new BookResponse(bookEntity.ISBN, bookEntity.Title, bookEntity.Year);
 
