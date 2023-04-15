@@ -9,26 +9,25 @@ public class BookStoreContext : DbContext
     public DbSet<Book> Books => Set<Book>();
     public DbSet<Author> Authors => Set<Author>();
     public DbSet<Topic> Topics => Set<Topic>();
+    public DbSet<Chapter> Chapters => Set<Chapter>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasSequence<int>("IdSequence")
-            .IncrementsBy(1000);
-
         modelBuilder.Entity<Author>()
             .Property(a => a.Id)
-            .ValueGeneratedOnAdd()
-            .UseHiLo("IdSequence");
+            .ValueGeneratedOnAdd();
 
         modelBuilder.Entity<Topic>()
             .Property(a => a.Id)
-            .ValueGeneratedOnAdd()
-            .UseHiLo("IdSequence");
+            .ValueGeneratedOnAdd();
 
         modelBuilder.Entity<Book>()
             .Property(a => a.Id)
-            .ValueGeneratedOnAdd()
-            .UseHiLo("IdSequence");
+            .ValueGeneratedOnAdd();
+
+        modelBuilder.Entity<Chapter>()
+            .Property(a => a.Id)
+            .ValueGeneratedOnAdd();
 
         base.OnModelCreating(modelBuilder);
     }

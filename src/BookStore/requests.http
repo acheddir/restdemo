@@ -26,3 +26,11 @@ Content-Type: application/json
   "title": "Designing APIs with Swagger and OpenAPI",
   "year": "2022"
 }
+
+### Partial Update
+PATCH http://localhost:5035/api/v1/books/9781617296284
+Content-Type: application/json
+
+{
+  "year": "2022"
+}
