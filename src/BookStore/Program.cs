@@ -1,4 +1,6 @@
+using Asp.Versioning;
 using BookStore.Filters;
+using BookStore.OpenApi;
 using BookStore.Services;
 using BookStore.Validators;
 using FluentValidation;
@@ -40,10 +42,34 @@ builder.Services.AddAuthentication(config =>
     };
 });
 
-builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddApiVersioning(config =>
+{
+    config.DefaultApiVersion = new ApiVersion(1, 0);
+    config.AssumeDefaultVersionWhenUnspecified = true;
+    config.ReportApiVersions = true;
+    config.Policies.Sunset(1.0)
+        .Effective(DateTimeOffset.Now.AddDays(60))
+        .Link("policy.html")
+            .Title("Versioning Policy")
+            .Type("text/html");
+    //config.ApiVersionReader = ApiVersionReader.Combine(
+    //    //new QueryStringApiVersionReader("api-version"),
+    //    //new HeaderApiVersionReader("X-Version")
+    //    //new MediaTypeApiVersionReader("version")
+    //);
+}).AddApiExplorer(config =>
+{
+    config.GroupNameFormat = "'v'VVV";
+    config.SubstituteApiVersionInUrl = true;
+});
 
+builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(config =>
 {
+    config.OperationFilter<SwaggerDefaultValues>();
+
     config.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.OAuth2,
@@ -69,26 +95,6 @@ builder.Services.AddSwaggerGen(config =>
     config.EnableAnnotations();
 });
 
-builder.Services.AddApiVersioning(config =>
-{
-    config.DefaultApiVersion = new ApiVersion(1, 0);
-    config.AssumeDefaultVersionWhenUnspecified = true;
-    config.ReportApiVersions = true;
-    //config.ApiVersionReader = ApiVersionReader.Combine(
-    //    //new QueryStringApiVersionReader("api-version"),
-    //    //new HeaderApiVersionReader("X-Version")
-    //    //new MediaTypeApiVersionReader("version")
-    //);
-});
-
-builder.Services.AddVersionedApiExplorer(config =>
-{
-    config.GroupNameFormat = "'v'VVV";
-    config.SubstituteApiVersionInUrl = true;
-});
-
-builder.Services.ConfigureOptions<ConfigureSwaggerOptions>();
-
 builder.Services.AddControllers(config => config.Filters.Add<ErrorHandlerFilterAttribute>());
 
 builder.Services.AddValidatorsFromAssemblyContaining<CreateBookCommandValidator>();
@@ -100,16 +106,17 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    var apiVersionDescriptionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
-
     app.UseSwagger();
     app.UseSwaggerUI(config =>
     {
-        foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions.Reverse())
+        var descriptions = app.DescribeApiVersions();
+
+        // build a swagger endpoint for each discovered API version
+        foreach (var description in descriptions)
         {
-            config.SwaggerEndpoint(
-                $"/swagger/{description.GroupName}/swagger.json",
-                description.GroupName);
+            var url = $"/swagger/{description.GroupName}/swagger.json";
+            var name = description.GroupName.ToUpperInvariant();
+            config.SwaggerEndpoint(url, name);
         }
 
         config.OAuthClientId(builder.Configuration["AzureAd:Audience"]);
@@ -121,23 +128,3 @@ app.UseHttpsRedirection();
 app.MapControllers();
 
 app.Run();
-
-public class ConfigureSwaggerOptions : IConfigureOptions<SwaggerGenOptions>
-{
-    readonly IApiVersionDescriptionProvider provider;
-
-    public ConfigureSwaggerOptions(IApiVersionDescriptionProvider provider) =>
-    this.provider = provider;
-
-    public void Configure(SwaggerGenOptions options)
-    {
-        foreach (var description in provider.ApiVersionDescriptions)
-        {
-            options.SwaggerDoc(description.GroupName, new OpenApiInfo
-            {
-                Version = description.ApiVersion.ToString(),
-                Title = $"API v{description.ApiVersion}",
-            });
-        }
-    }
-}
