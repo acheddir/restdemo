@@ -11,6 +11,7 @@ namespace BookStore.Controllers.v2
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiVersion("2.0")]
+    [ApiVersion("2.1")]
     public class BooksController : ControllerBase
     {
         private readonly IBookService bookService;
@@ -49,20 +50,21 @@ namespace BookStore.Controllers.v2
             return Created($"api/v1/books/{bookResponse.Isbn}", bookResponse);
         }
 
-        [HttpDelete("{isbn}")]
-        public async Task<IActionResult> DeleteAsync(string isbn)
-        {
-            await bookService.DeleteBookAsync(isbn);
-
-            return Ok();
-        }
-
         [HttpPut("{isbn}")]
         public async Task<IActionResult> UpdateAsync(string isbn, UpdateBookCommand command)
         {
             var bookResponse = await bookService.UpdateBookAsync(isbn, command);
 
             return Ok(bookResponse);
+        }
+
+        [HttpDelete("{isbn}")]
+        [MapToApiVersion("2.1")]
+        public async Task<IActionResult> DeleteAsync(string isbn)
+        {
+            await bookService.DeleteBookAsync(isbn);
+
+            return Ok();
         }
     }
 }

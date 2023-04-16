@@ -8,6 +8,7 @@ namespace BookStore.Controllers.v2
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
     [ApiVersion("2.0")]
+    [ApiVersion("2.1")]
     public class AuthorsController : ControllerBase
     {
         private readonly IBookService bookService;

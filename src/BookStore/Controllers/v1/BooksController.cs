@@ -10,7 +10,7 @@ namespace BookStore.Controllers.v1
     [Authorize]
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
-    [ApiVersion("1.0")]
+    [ApiVersion("1.0", Deprecated = true)]
     public class BooksController : ControllerBase
     {
         private readonly IBookService bookService;
