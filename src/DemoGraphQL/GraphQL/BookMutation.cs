@@ -1,24 +1,28 @@
-using DemoGraphQL.Dto;
-using DemoGraphQL.GraphQL.Types;
 using DemoGraphQL.Model;
-using GraphQL;
-using GraphQL.Types;
+using HotChocolate.Subscriptions;
 
 namespace DemoGraphQL.GraphQL;
 
-public class BookMutation : ObjectGraphType
+public class BookMutation
 {
-    public BookMutation(IBookDataStore dataStore)
+    private readonly IBookDataStore dataStore;
+    private readonly ITopicEventSender eventSender;
+
+    public BookMutation(IBookDataStore dataStore, ITopicEventSender eventSender)
     {
-        Field<BookType>("addBook")
-            .Argument<NonNullGraphType<BookInputType>>("input")
-            .Resolve(ctx => {
-                var input = ctx.GetArgument<BookInput>("input");
+        this.dataStore = dataStore;
+        this.eventSender = eventSender;
+    }
 
-                var book = new Book(input.Id, input.Title, new Author(input.AuthorName));
-                dataStore.AddBook(book);
+    public async Task<Book> PublishBook(int id, string title, string authorName,
+        CancellationToken cancellationToken)
+    {
+        var book = new Book(id, title, new Author(authorName));
 
-                return book;
-            });
+        dataStore.AddBook(book);
+
+        await eventSender.SendAsync(nameof(PublishBook), book, cancellationToken);
+
+        return book;
     }
 }

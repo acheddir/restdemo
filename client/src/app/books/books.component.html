@@ -1,0 +1,23 @@
+<div>
+    <h3>Books</h3>
+
+    <form class="form" [formGroup]="bookForm" (ngSubmit)="addBook()">
+        <input type="text" name="id" placeholder="Enter id" formControlName="id">
+        <br>
+        <input type="text" name="title" placeholder="Enter title" formControlName="title">
+        <br>
+        <input type="text" name="author" placeholder="Enter id" formControlName="author">
+        <br>
+        <button [disabled]="bookForm.invalid">Publish Book</button>
+    </form>
+
+    <div *ngIf="books">
+        <ul>
+            <li *ngFor="let book of books">
+                <div>
+                    <span>{{book.title}}</span>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
