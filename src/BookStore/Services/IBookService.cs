@@ -5,6 +5,7 @@ namespace BookStore.Services
     public interface IBookService
     {
         Task<List<BookResponse>> GetBooksAsync(SieveModel sieveModel);
+        Task<List<BookResponse>> GetBooksAsync();
         Task<List<BookResponse>> GetBooksByAuthorv2Async(int authorId);
         Task<List<string>> GetBooksByAuthorAsync(int authorId);
         Task<BookResponse> GetBookAsync(string isbn);

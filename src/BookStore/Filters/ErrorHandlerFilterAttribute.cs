@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Net;
+using ValidationException = BookStore.Exceptions.ValidationException;
 
 namespace BookStore.Filters
 {

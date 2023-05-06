@@ -1,3 +1,5 @@
+using Npgsql;
+
 namespace BookStore.Model;
 
 public class BookStoreContext : DbContext
@@ -13,6 +15,8 @@ public class BookStoreContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresEnum<BookStatus>();
+
         modelBuilder.Entity<Author>()
             .Property(a => a.Id)
             .ValueGeneratedOnAdd();

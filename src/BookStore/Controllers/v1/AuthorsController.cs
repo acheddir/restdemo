@@ -1,6 +1,4 @@
-﻿using Asp.Versioning;
-using BookStore.Services;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookStore.Controllers.v1

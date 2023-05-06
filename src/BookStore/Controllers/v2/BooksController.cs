@@ -1,10 +1,8 @@
-﻿using Asp.Versioning;
-using BookStore.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Sieve.Models;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Net;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookStore.Controllers.v2
 {

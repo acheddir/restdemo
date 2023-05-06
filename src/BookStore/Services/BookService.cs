@@ -1,6 +1,4 @@
-﻿using FluentValidation;
-using Sieve.Models;
-using Sieve.Services;
+﻿using Sieve.Models;
 using System.Text.RegularExpressions;
 
 namespace BookStore.Services
@@ -59,6 +57,7 @@ namespace BookStore.Services
                 bookEntity.ISBN,
                 bookEntity.Title,
                 bookEntity.Year,
+                Enum.GetName(typeof(BookStatus), bookEntity.Status)!,
                 new AuthorResponse(bookEntity.Author!.Name),
                 new TopicResponse(bookEntity.Topic!.Title));
         }
@@ -92,6 +91,7 @@ namespace BookStore.Services
                         bookEntity.ISBN,
                         bookEntity.Title,
                         bookEntity.Year,
+                        bookEntity.Status.ToString(),
                         new AuthorResponse(bookEntity.Author!.Name),
                         new TopicResponse(bookEntity.Topic!.Title))
                     : throw new NotFoundException();
@@ -110,6 +110,24 @@ namespace BookStore.Services
                         b.ISBN,
                         b.Title,
                         b.Year,
+                        b.Status.ToString(),
+                        new AuthorResponse(b.Author!.Name),
+                        new TopicResponse(b.Topic!.Title)))
+                .ToListAsync();
+        }
+
+        public Task<List<BookResponse>> GetBooksAsync()
+        {
+            return context.Books
+                .Include(b => b.Author)
+                .Include(b => b.Topic)
+                .Where(b => !b.IsDeleted)
+                .Select(b =>
+                    new BookResponse(
+                        b.ISBN,
+                        b.Title,
+                        b.Year,
+                        b.Status.ToString(),
                         new AuthorResponse(b.Author!.Name),
                         new TopicResponse(b.Topic!.Title)))
                 .ToListAsync();
@@ -125,6 +143,7 @@ namespace BookStore.Services
                     b.ISBN,
                     b.Title,
                     b.Year,
+                    b.Status.ToString(),
                     new AuthorResponse(b.Author!.Name),
                     new TopicResponse(b.Topic!.Title)))
                 .ToListAsync();
@@ -177,10 +196,13 @@ namespace BookStore.Services
                 bookEntity.ISBN,
                 bookEntity.Title,
                 bookEntity.Year,
+                bookEntity.Status.ToString(),
                 new AuthorResponse(bookEntity.Author!.Name),
                 new TopicResponse(bookEntity.Topic!.Title));
 
             return bookResponse;
         }
+
+        
     }
 }

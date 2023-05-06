@@ -1,21 +1,11 @@
-using Asp.Versioning;
-using BookStore.Filters;
-using BookStore.OpenApi;
-using BookStore.Services;
-using BookStore.Validators;
-using FluentValidation;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Microsoft.Extensions.Options;
-using Microsoft.OpenApi.Models;
-using Sieve.Services;
-using Swashbuckle.AspNetCore.SwaggerGen;
+using Npgsql;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<BookStoreContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("BookStore")));
+var dataSourceBuilder = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("BookStore"));
+dataSourceBuilder.MapEnum<BookStatus>();
+
+builder.Services.AddDbContext<BookStoreContext>(options => options.UseNpgsql(dataSourceBuilder.Build()));
 
 builder.Services.AddScoped<IBookService, BookService>();
 
@@ -23,11 +13,11 @@ builder.Services.AddAuthentication(config =>
 {
     config.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     config.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
+})
+.AddJwtBearer(options =>
 {
     options.Authority = builder.Configuration["AzureAd:Authority"];
     options.Audience = builder.Configuration["AzureAd:Audience"];
-
     options.Events = new JwtBearerEvents
     {
         OnAuthenticationFailed = c =>
@@ -57,7 +47,8 @@ builder.Services.AddApiVersioning(config =>
     //    //new HeaderApiVersionReader("X-Version")
     //    //new MediaTypeApiVersionReader("version")
     //);
-}).AddApiExplorer(config =>
+})
+.AddApiExplorer(config =>
 {
     config.GroupNameFormat = "'v'VVV";
     config.SubstituteApiVersionInUrl = true;
@@ -69,7 +60,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(config =>
 {
     config.OperationFilter<SwaggerDefaultValues>();
-
     config.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.OAuth2,
@@ -89,21 +79,17 @@ builder.Services.AddSwaggerGen(config =>
             }
         }
     });
-
     config.OperationFilter<AuthorizeCheckOperationFilter>();
-
     config.EnableAnnotations();
 });
 
 builder.Services.AddControllers(config => config.Filters.Add<ErrorHandlerFilterAttribute>());
-
 builder.Services.AddValidatorsFromAssemblyContaining<CreateBookCommandValidator>();
 
 builder.Services.AddScoped<SieveProcessor>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

@@ -11,17 +11,18 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BookStore.Migrations
 {
     [DbContext(typeof(BookStoreContext))]
-    [Migration("20230415105857_DataSeed")]
-    partial class DataSeed
+    [Migration("20230505215448_BookStatusField")]
+    partial class BookStatusField
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.4")
+                .HasAnnotation("ProductVersion", "7.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "book_status", new[] { "draft", "in_review", "published", "blocked" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("BookStore.Model.Author", b =>
@@ -58,6 +59,9 @@ namespace BookStore.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
+
+                    b.Property<BookStatus>("Status")
+                        .HasColumnType("book_status");
 
                     b.Property<string>("Title")
                         .IsRequired()

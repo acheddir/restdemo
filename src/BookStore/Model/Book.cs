@@ -1,12 +1,16 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using Sieve.Attributes;
-using System.Xml.Linq;
 
 namespace BookStore.Model;
 
 public class Book
 {
+    public Book()
+    {
+        this.Status = BookStatus.Draft;
+    }
+
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
@@ -21,14 +25,21 @@ public class Book
 
     [Required]
     public required string Year { get; set; }
+    
+    [Required]
+    public BookStatus Status { get; set; }
 
     public bool IsDeleted { get; set; }
 
     public int TopicId { get; set; }
     public Topic? Topic { get; set; }
-
     public int AuthorId { get; set; }
     public Author? Author { get; set; }
 
     public ICollection<Chapter> Chapters { get; set; } = new List<Chapter>();
+
+    public void Publish()
+    {
+        this.Status = BookStatus.Published;
+    }
 }

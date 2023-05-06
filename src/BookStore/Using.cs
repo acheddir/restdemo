@@ -1,4 +1,16 @@
 global using Microsoft.EntityFrameworkCore;
+global using GraphQL.Types;
 global using BookStore.Exceptions;
+global using BookStore.Services;
+global using BookStore.Validators;
+global using FluentValidation;
 global using BookStore.Model;
 global using BookStore.Dto;
+global using Asp.Versioning;
+global using BookStore.Filters;
+global using BookStore.OpenApi;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
+global using Microsoft.Extensions.Options;
+global using Microsoft.OpenApi.Models;
+global using Sieve.Services;
+global using Swashbuckle.AspNetCore.SwaggerGen;
