@@ -24,7 +24,7 @@ export class BooksComponent implements OnInit {
       mutation: PUBLISH_BOOK,
       variables: {
         input: {
-          id: this.bookForm.value.id,
+          id: this.bookForm.value.id && Number.parseInt(this.bookForm.value.id),
           title: this.bookForm.value.title,
           authorName: this.bookForm.value.author
         }

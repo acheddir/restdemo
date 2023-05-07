@@ -12,7 +12,7 @@ const PUBLISH_BOOK = gql`
     mutation newBook($input: PublishBookInput!) {
         publishBook (input: $input) {
             book {
-            title
+                title
             }
         }
     }
